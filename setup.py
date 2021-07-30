@@ -16,7 +16,7 @@ setup(
     install_requires=[
         'pynetbox==5.0.5',
         'netaddr==0.8.0',
-        'netifaces==0.10.9',
+        'netifaces==0.11.0',
         'pyyaml==5.4.1',
         'jsonargparse==2.32.2',
     ],
