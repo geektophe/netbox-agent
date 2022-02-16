@@ -2,6 +2,8 @@ import socket
 import subprocess
 from shutil import which
 
+from slugify import slugify
+
 from netbox_agent.config import netbox_instance as nb
 
 
@@ -60,6 +62,7 @@ def get_hostname(config):
 
 
 def create_netbox_tags(tags):
+    ret = []
     for tag in tags:
         nb_tag = nb.extras.tags.get(
             name=tag
@@ -67,5 +70,7 @@ def create_netbox_tags(tags):
         if not nb_tag:
             nb_tag = nb.extras.tags.create(
                 name=tag,
-                slug=tag,
+                slug=slugify(tag),
             )
+        ret.append(nb_tag)
+    return ret

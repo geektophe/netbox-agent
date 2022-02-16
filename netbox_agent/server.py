@@ -29,9 +29,10 @@ class ServerBase():
 
         self.network = None
 
-        self.tags = list(set(config.device.tags.split(','))) if config.device.tags else []
-        if self.tags and len(self.tags):
-            create_netbox_tags(self.tags)
+        self.tags = list(set([
+            x.strip() for x in config.device.tags.split(',') if x.strip()
+        ])) if config.device.tags else []
+        self.nb_tags = list(create_netbox_tags(self.tags))
 
     def get_tenant(self):
         tenant = Tenant()
@@ -194,7 +195,7 @@ class ServerBase():
             site=datacenter.id if datacenter else None,
             tenant=tenant.id if tenant else None,
             rack=rack.id if rack else None,
-            tags=self.tags,
+            tags=[{'name': x} for x in self.tags],
         )
         return new_chassis
 
@@ -216,7 +217,7 @@ class ServerBase():
             site=datacenter.id if datacenter else None,
             tenant=tenant.id if tenant else None,
             rack=rack.id if rack else None,
-            tags=self.tags,
+            tags=[{'name': x} for x in self.tags],
         )
         return new_blade
 
@@ -266,7 +267,7 @@ class ServerBase():
             site=datacenter.id if datacenter else None,
             tenant=tenant.id if tenant else None,
             rack=rack.id if rack else None,
-            tags=self.tags,
+            tags=[{'name': x} for x in self.tags],
         )
         return new_server
 
@@ -301,7 +302,7 @@ class ServerBase():
                 actual_device_bay.installed_device = None
                 actual_device_bay.save()
             # setup new device bay
-            real_device_bay = real_device_bays[0]
+            real_device_bay = next(real_device_bays)
             real_device_bay.installed_device = server
             real_device_bay.save()
         else:
@@ -338,7 +339,7 @@ class ServerBase():
             actual_device_bay.installed_device = None
             actual_device_bay.save()
         # setup new device bay
-        real_device_bay = real_device_bays[0]
+        real_device_bay = next(real_device_bays)
         real_device_bay.installed_device = expansion
         real_device_bay.save()
 
@@ -421,7 +422,7 @@ class ServerBase():
 
 
         if sorted(set(server.tags)) != sorted(set(self.tags)):
-            server.tags = self.tags
+            server.tags = [x.id for x in self.nb_tags]
             update += 1
 
         if config.update_all or config.update_location:
