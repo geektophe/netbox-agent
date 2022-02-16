@@ -33,6 +33,8 @@ class ServerBase():
         if self.tags and len(self.tags):
             create_netbox_tags(self.tags)
 
+        self.custom_fields = {k:v for k,v in list(f.split("=") for f in list(set(config.device.custom_fields.split(","))))} if config.device.custom_fields else {}
+
     def get_tenant(self):
         tenant = Tenant()
         return tenant.get()
@@ -195,6 +197,7 @@ class ServerBase():
             tenant=tenant.id if tenant else None,
             rack=rack.id if rack else None,
             tags=self.tags,
+            custom_fields=self.custom_fields,
         )
         return new_chassis
 
@@ -217,6 +220,7 @@ class ServerBase():
             tenant=tenant.id if tenant else None,
             rack=rack.id if rack else None,
             tags=self.tags,
+            custom_fields=self.custom_fields,
         )
         return new_blade
 
@@ -422,6 +426,10 @@ class ServerBase():
 
         if sorted(set(server.tags)) != sorted(set(self.tags)):
             server.tags = self.tags
+            update += 1
+
+        if server.custom_fields != self.custom_fields:
+            server.custom_fields = self.custom_fields
             update += 1
 
         if config.update_all or config.update_location:
