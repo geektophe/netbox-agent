@@ -34,13 +34,12 @@ class ServerBase():
             create_netbox_tags(self.tags)
 
         self.custom_fields = (
-            {
-                k: v
-                for k, v in list(
+            dict(
+                list(
                     f.split("=")
                     for f in list(set(config.device.custom_fields.split(",")))
                 )
-            }
+            )
             if config.device.custom_fields
             else {}
         )
